@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form method="post">
+            <label for="stop_f">From:</label>
+            <input type="text" name="stop_f" id="stop_f">
+
+            <label for="stop_t">To:</label>
+            <input type="text" name="stop_t" id="stop_t">
+
+            <input type="submit" value="Find Routes"/>
+        </form>
+        {% if result %}
+            Result is: {{ result }}
+        {% endif %}
+    </body>
+</html>
