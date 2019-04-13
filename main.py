@@ -92,11 +92,64 @@ def route_finding():
 					for x in route:
 						if x == line2[0] and i < len(lines):
 							result.append(lines[i])
+			else:
+				trip_f=[]
+				for x in time_1:
+					for i, line in enumerate(lines):
+						line = list(line.split(','))
+						if x==line[0]:
+							line2=list(line[4].split('\n'))
+							if line[3]==stop_f:
+								seq_1=line2[0]
+							if int(line2[0]) > int(seq_1):
+								for j,fine in enumerate(lines):
+									fine =list(fine.split(','))
+									if line[3]==fine[3]:
+										for k,dine in enumerate(lines):
+											dine=list(dine.split(','))
+											if dine[0]==fine[0]:
+												if dine[3]==stop_t:
+													lin_1=list(fine[4].split('\n'))
+													lin_2=list(dine[4].split('\n'))
+													if int(lin_1[0]) < int(lin_2[0]):
+														trip_1=[]
+														trip_1.append(x)
+														trip_1.append(dine[0])
+														trip_f.append(trip_1)
+
+				if len(trip_f)==0:
+					result.append("No route exist")
+				else:
+					h= open('trip.txt','r')
+					lines = h.readlines()
+					h.close()
+					route=[]
+
+					for i, line in enumerate(lines):
+						line = list(line.split(','))
+						line2= list(line[2].split('\n'))
+					for o in trip_f:
+						for d in o:
+							if (o == line2[0]) and i < len(lines):
+								route.append(line[0])
 
 
-					
+					p= open('route.txt','r')
+					lines = p.readlines()
+					p.close()
 
-		except EXCEPTION:
+					result.append("One-hop routes:")
+
+					for i, line in enumerate(lines):
+						line = list(line.split(','))
+						line2= list(line[3].split('\n'))
+						for x in route:
+							if x == line2[0] and i < len(lines):
+								result.append(lines[i])
+
+
+
+		except Exception:
 			pass
 		return render_template('route_finding.jinja2', result= json.dumps(result))
 	else:
