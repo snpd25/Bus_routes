@@ -11,7 +11,6 @@ def index():
 @app.route('/route_finding', methods=['GET', 'POST'])
 def route_finding():
 	result = []
-	result.append("OK")
 	if request.method == 'POST':
 		stop_f = request.form['stop_f']
 		stop_t = request.form['stop_t']
@@ -58,6 +57,7 @@ def route_finding():
 							trip.append(x)
 				if len(trip)==0:
 					result.append("No direct root")
+					flag_1=0
 				else:
 					#result.append(trip)
 					flag_1=1
@@ -92,30 +92,38 @@ def route_finding():
 					for x in route:
 						if x == line2[0] and i < len(lines):
 							result.append(lines[i])
-			else:
+			elif flag_1==0:
+				route_dict={}
 				trip_f=[]
-				for x in time_1:
-					for i, line in enumerate(lines):
-						line = list(line.split(','))
-						if x==line[0]:
-							line2=list(line[4].split('\n'))
-							if line[3]==stop_f:
-								seq_1=line2[0]
-							if int(line2[0]) > int(seq_1):
-								for j,fine in enumerate(lines):
-									fine =list(fine.split(','))
-									if line[3]==fine[3]:
-										for k,dine in enumerate(lines):
-											dine=list(dine.split(','))
-											if dine[0]==fine[0]:
-												if dine[3]==stop_t:
-													lin_1=list(fine[4].split('\n'))
-													lin_2=list(dine[4].split('\n'))
-													if int(lin_1[0]) < int(lin_2[0]):
-														trip_1=[]
-														trip_1.append(x)
-														trip_1.append(dine[0])
-														trip_f.append(trip_1)
+
+				g= open('stop_timing.txt','r')
+				lines = g.readlines()
+				g.close()
+
+				for pi,line_1 in enumerate(lines):
+					line_1 = list(line_1.split(','))
+					try:
+						hype=len(route_dict[int(line_1[3])])
+					except Exception:
+						if(pi>0):
+							route_dict[int(line_1[3])]=[]
+					line_1[4]=list(line_1[4].split('\n'))
+					if(pi>1 and int(line_1[4][0])>0):
+						temp=list(lines[pi-1].split(','))
+						route_dict[int(temp[3])].append(line_1)
+
+
+				for k in route_dict[int(stop_f)]:
+					a =list(map(int,k[2].split(':')))
+					for j in route_dict[int(k[3])]:
+						temp=[]
+						if(int(j[3])==int(stop_t)):
+							b=list(map(int,j[1].split(':')))
+							if(b[0]>a[0] or (b[0]==a[0] and b[1]>a[1])):
+								result.append("okay")
+								temp.append(k)
+								temp.append(j)
+								trip_f.append(temp)
 
 				if len(trip_f)==0:
 					result.append("No route exist")
@@ -125,29 +133,30 @@ def route_finding():
 					h.close()
 					route=[]
 
-					for i, line in enumerate(lines):
-						line = list(line.split(','))
-						line2= list(line[2].split('\n'))
 					for o in trip_f:
+						temp=[]
 						for d in o:
-							if (o == line2[0]) and i < len(lines):
-								route.append(line[0])
-
-
+							for line in lines:
+								line = list(line.split(','))
+								line2= list(line[2].split('\n'))
+								if (d[0] == line2[0]):
+									temp.append(line[0])
+						o.append(temp)
 					p= open('route.txt','r')
 					lines = p.readlines()
 					p.close()
 
 					result.append("One-hop routes:")
 
-					for i, line in enumerate(lines):
-						line = list(line.split(','))
-						line2= list(line[3].split('\n'))
-						for x in route:
-							if x == line2[0] and i < len(lines):
-								result.append(lines[i])
-
-
+					for x in trip_f:
+						temp=[]
+						for line in lines:
+							line = list(line.split(','))
+							line2= list(line[3].split('\n'))
+							if x[-1][0] == line2[0] or x[-1][1]==line2[0]:
+								temp.append(line[1])
+						x.append(temp)
+						result.append(x)
 
 		except Exception:
 			pass
